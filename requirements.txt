@@ -7,15 +7,14 @@ sqlite3
 time
 asyncio
 ThreadPoolExecutor
-cached, TTLCache
+TTLCache
 google.generativeai
 requests
 WebSocketClosedError
 atexit
 os
 tempfile
-AutoTokenizer, AutoModel
-ThreadPoolExecutor, as_completed
+ThreadPoolExecutor
 numpy
 faiss
 SentenceTransformer
