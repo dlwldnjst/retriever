@@ -2,7 +2,6 @@ pandas
 torch
 logging
 asyncio
-concurrent.futures
 cachetools
 google.generativeai
 requests
