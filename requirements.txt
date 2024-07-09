@@ -1,6 +1,6 @@
+pandas
 torch
 logging
-sqlite3
 time
 asyncio
 concurrent.futures
