@@ -1,6 +1,5 @@
 torch
 logging
-re
 sqlite3
 time
 asyncio
