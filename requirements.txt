@@ -1,5 +1,6 @@
 pandas
 torch
+streamlit
 logging
 re
 sqlite3
