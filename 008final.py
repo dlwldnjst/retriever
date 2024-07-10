@@ -919,8 +919,6 @@ def main():
                         st.session_state.filtered_books = pd.DataFrame()
                         st.session_state.recommendations = ""
                         
-                        # 사용자 입력 처리
-                        results = process_user_input_sync(user_input)
 
                     except WebSocketClosedError:
                         st.error("웹소켓 연결이 닫혔습니다. 다시 시도해 주세요.")
