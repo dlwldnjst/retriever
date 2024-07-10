@@ -97,7 +97,7 @@ def connect_to_uploaded_db(uploaded_file):
                 tmp_file.write(uploaded_file.getvalue())
                 tmp_file_path = tmp_file.name
             
-            st.write(f"임시 파일 경로: {tmp_file_path}")
+            # st.write(f"임시 파일 경로: {tmp_file_path}")
             
             # SQLite 연결
             conn = sqlite3.connect(tmp_file_path)
@@ -106,7 +106,7 @@ def connect_to_uploaded_db(uploaded_file):
             cursor = conn.cursor()
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
             tables = cursor.fetchall()
-            st.write(f"데이터베이스 테이블: {tables}")
+            # st.write(f"데이터베이스 테이블: {tables}")
             
             # 세션 상태에 데이터베이스 연결과 경로 저장
             st.session_state.db_connection = conn
@@ -197,8 +197,8 @@ cache = TTLCache(maxsize=100, ttl=300)
 def extract_keywords(user_input):
     prompt = (
         f"다음 문장에서 도서 검색을 위한 키워드를 추출해: \"{user_input}\". "
-        "'책'이나 '추천'이라는 단어는 키워드에서 제외시켜. "
-        "키워드만 반환해. 콤마로 구분하여."
+        "다음 단어는 키워드에서 제외시켜 : '책' '추천' '대한'"
+        "키워드만 반환해. 콤마로 구분"
     )
     response = call_gemini_api_cached(prompt)
     if response:
@@ -213,40 +213,32 @@ def search_books(keywords):
     logger.info(f"Searching for keywords: {keywords}")
 
     if 'db_connection' not in st.session_state or st.session_state.db_connection is None:
-        # 세션이 초기화되지 않았음을 로그로 기록
         logger.error("데이터베이스 연결이 없습니다.")
-        # 세션 상태에 오류 메시지를 저장하여 나중에 UI에서 사용할 수 있도록 합니다.
         st.session_state.error_message = "데이터베이스 연결이 없습니다. 파일을 다시 업로드해주세요."
         return pd.DataFrame()
 
     conn = st.session_state.db_connection
     c = conn.cursor()
 
-    # 테이블 존재 여부 확인
     c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='books_fts';")
     if not c.fetchone():
         logger.error("books_fts 테이블이 존재하지 않습니다.")
         st.session_state.error_message = "books_fts 테이블이 존재하지 않습니다. 데이터베이스 구조를 확인해주세요."
         return pd.DataFrame()
 
-    query_parts = []
-    params = []
-    for keyword in keywords:
-        if keyword.strip():
-            query_parts.append("books_fts MATCH ?")
-            params.append(f'"{keyword.strip()}"')
-
-    if not query_parts:
-        logger.warning("유효한 키워드가 없습니다.")
-        st.session_state.warning_message = "검색 키워드가 없습니다."
+    if not keywords:
+        logger.warning("검색할 키워드가 없습니다.")
         return pd.DataFrame()
 
-    query = ' OR '.join(query_parts)
+    combined_keywords = ' AND '.join(keywords)
+
     full_query = f'''
         SELECT title, author, description, isbn
         FROM books_fts 
-        WHERE {query};
+        WHERE books_fts MATCH ?;
     '''
+
+    params = [combined_keywords]
 
     logger.info(f"실행할 쿼리: {full_query}")
     logger.info(f"쿼리 파라미터: {params}")
@@ -383,7 +375,7 @@ def extract_book_info_from_recommendations(recommendations, filtered_books):
     if not book_info_list:
         logger.warning("No book information could be extracted from recommendations")
     
-    st.write(f"추출된 책 정보: {book_info_list}")  # 디버깅용
+    # st.write(f"추출된 책 정보: {book_info_list}")  # 디버깅용
     
     return book_info_list
 
@@ -450,8 +442,9 @@ def process_user_input_sync(user_input):
         with st.spinner('리트리버가 책을 찾고 있어요...'):
             # Keyword extraction
             st.write("1. 키워드 추출 중...")
-            st.session_state.keywords = extract_keywords(processed_input)
-            st.write(f"추출된 키워드: {st.session_state.keywords}")
+            extracted_keywords = extract_keywords(processed_input)
+            st.session_state.keywords = extracted_keywords
+            # st.write(f"추출된 키워드: {st.session_state.keywords}")
             
             if not st.session_state.keywords:
                 st.warning("키워드를 추출하지 못했습니다. 다른 질문을 시도해보세요.")
@@ -465,7 +458,7 @@ def process_user_input_sync(user_input):
                 st.warning("검색 결과가 없습니다. 다른 키워드로 시도해보세요.")
                 return
             
-            st.write(f"검색된 도서 수: {len(search_results)}")
+            # st.write(f"검색된 도서 수: {len(search_results)}")
 
             # Filtering and adding call numbers
             try:
@@ -484,7 +477,7 @@ def process_user_input_sync(user_input):
             # Vector search
             try:
                 st.write("4. 벡터 검색을 통한 상위 도서 추출 중...")
-                top_books = search_with_vector(user_input, top_k=10)
+                top_books = search_with_vector(' '.join(st.session_state.keywords), top_k=10)
                 st.session_state.filtered_books = top_books
 
                 if top_books is None or top_books.empty:
@@ -498,7 +491,7 @@ def process_user_input_sync(user_input):
             # Book recommendations
             try:
                 st.write("5. 최종 도서 추천 중...")
-                st.session_state.recommendations = get_book_recommendations(user_input, st.session_state.filtered_books)
+                st.session_state.recommendations = get_book_recommendations(' '.join(st.session_state.keywords), st.session_state.filtered_books)
             except Exception as e:
                 st.error(f"도서 추천 중 오류가 발생했습니다: {str(e)}")
                 logger.error(f"Exception during book recommendations: {traceback.format_exc()}")
@@ -542,6 +535,7 @@ def process_user_input_sync(user_input):
         display_books(st.session_state.books_info)
     else:
         st.warning("추천할 도서가 없습니다.")
+
 
 def display_books(books):
     if books.empty:
@@ -650,7 +644,7 @@ def fetch_book_info_batch(books, headers, api_url, user_books_df):
                 st.warning(warning_message)
             time.sleep(0.1)  # API rate limiting을 위한 딜레이
 
-    st.write(f"최종 책 정보 목록: {book_info_list}")  # 디버깅을 위해 최종 정보 출력
+    # st.write(f"최종 책 정보 목록: {book_info_list}")  # 디버깅을 위해 최종 정보 출력
     return pd.DataFrame(book_info_list)
 
 # 텍스트 임베딩 함수
@@ -875,12 +869,12 @@ def main():
                     c = st.session_state.db_connection.cursor()
                     c.execute("SELECT name FROM sqlite_master WHERE type='table';")
                     tables = c.fetchall()
-                    st.write(f"데이터베이스 테이블: {tables}")
+                    # st.write(f"데이터베이스 테이블: {tables}")
                     
                     if ('books_fts',) in tables:
                         c.execute("PRAGMA table_info(books_fts);")
                         columns = c.fetchall()
-                        st.write(f"books_fts 테이블 구조: {columns}")
+                        # st.write(f"books_fts 테이블 구조: {columns}")
                     else:
                         st.error("books_fts 테이블이 존재하지 않습니다.")
                     
@@ -888,7 +882,7 @@ def main():
                     cursor = st.session_state.db_connection.cursor()
                     cursor.execute("SELECT COUNT(*) FROM books_fts;")
                     count = cursor.fetchone()[0]
-                    st.write(f"FTS 테이블의 총 레코드 수: {count}")
+                    # st.write(f"FTS 테이블의 총 레코드 수: {count}")
                 
                 # ISBN 열 찾기 (대소문자 구분 없이)
                 isbn_column = next((col for col in st.session_state.user_books.columns if col.lower() == 'isbn'), None)
