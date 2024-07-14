@@ -10,3 +10,4 @@ faiss-cpu
 sentence-transformers
 psutil
 mysql-connector-python
+openpyxl
