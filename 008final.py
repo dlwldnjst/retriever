@@ -14,7 +14,6 @@ import numpy as np
 import faiss
 from sentence_transformers import SentenceTransformer
 import traceback 
-import psutil
 import mysql.connector
 from mysql.connector import Error
 from io import BytesIO
