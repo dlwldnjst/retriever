@@ -354,7 +354,7 @@ def save_recommendations(recommendations):
 
 @st.cache_resource
 def load_model():
-    return SentenceTransformer('paraphrase-MiniLM-L6-v2')
+    return SentenceTransformer('xlm-r-bert-base-nli-stsb-mean-tokens')
 
 model = load_model()
 
