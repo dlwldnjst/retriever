@@ -1,15 +1,12 @@
 streamlit
 pandas
 torch
-logging
 cachetools
 google-generativeai
 requests
 tornado
-atexit
-concurrent.futures
 numpy
 faiss-cpu
 sentence-transformers
-traceback
+psutil
 mysql-connector-python
