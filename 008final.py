@@ -860,7 +860,7 @@ def main():
         }
         </script>
         """,
-        height=60
+        height=50
     )
 
 if __name__ == "__main__":
