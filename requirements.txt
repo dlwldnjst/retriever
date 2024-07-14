@@ -2,7 +2,6 @@ streamlit
 pandas
 torch
 logging
-re
 time
 cachetools
 google-generativeai
