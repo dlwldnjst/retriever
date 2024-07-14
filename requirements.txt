@@ -5,7 +5,7 @@ cachetools
 google-generativeai
 requests
 tornado
-numpy==1.21.2
+numpy==2.0.0
 faiss-cpu
 sentence-transformers
 psutil
