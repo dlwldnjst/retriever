@@ -844,6 +844,9 @@ def main():
         <div class="footer">
             <span onclick="openRetriever()">리트리버란?</span>
             <span onclick="showEmail()">문의 <span id="email" class="hidden-email">: dlwldnjst@gmail.com</span></span>
+            <br>
+            <br>
+            <span>ⓒ 2024. LEEJIWON. All rights reserved.</span>
         </div>
         <script>
         function showEmail() {
@@ -857,7 +860,7 @@ def main():
         }
         </script>
         """,
-        height=50
+        height=60
     )
 
 if __name__ == "__main__":
