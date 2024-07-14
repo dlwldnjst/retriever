@@ -14,5 +14,4 @@ numpy
 faiss-cpu
 sentence-transformers
 traceback
-psutil
 mysql-connector-python
