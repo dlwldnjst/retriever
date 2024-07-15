@@ -18,7 +18,14 @@ import mysql.connector
 from mysql.connector import Error
 from io import BytesIO
 
-model = SentenceTransformer('xlm-r-bert-base-nli-stsb-mean-tokens')
+def load_model():
+    return SentenceTransformer('xlm-r-bert-base-nli-stsb-mean-tokens')
+
+def get_text_embedding(text):
+    # 모델을 사용할 때만 로드
+    model = load_model()
+    embedding = model.encode(text)
+    return np.array(embedding).flatten()  # 1D 배열로 변환
 
 # 로깅 설정
 logging.basicConfig(level=logging.DEBUG)
@@ -146,7 +153,7 @@ def preprocess_input(text):
     return re.sub(r'\s+', ' ', text).strip()
 
 # API 호출 결과 캐싱
-cache = TTLCache(maxsize=100, ttl=300)
+cache = TTLCache(maxsize=5, ttl=300)
 
 def extract_keywords(user_input):
     prompt = (
@@ -357,7 +364,6 @@ def load_model():
     return SentenceTransformer('xlm-r-bert-base-nli-stsb-mean-tokens')
 
 model = load_model()
-
 
 def parse_saved_recommendations():
     if 'saved_recommendations' not in st.session_state:
@@ -860,7 +866,7 @@ def main():
         }
         </script>
         """,
-        height=50
+        height=60
     )
 
 if __name__ == "__main__":
