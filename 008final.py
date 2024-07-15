@@ -17,6 +17,7 @@ import traceback
 import mysql.connector
 from mysql.connector import Error
 from io import BytesIO
+import psutil
 
 def load_model():
     return SentenceTransformer('xlm-r-bert-base-nli-stsb-mean-tokens')
@@ -868,6 +869,13 @@ def main():
         """,
         height=60
     )
+
+    memory_usage = get_memory_usage()
+    total_memory = psutil.virtual_memory().total / (1024 ** 3)  # Convert bytes to GB
+    available_memory = psutil.virtual_memory().available / (1024 ** 3)  # Convert bytes to GB
+
+    st.metric(label="Memory Usage", value=f"{memory_usage:.2f} GB / {total_memory:.2f} GB")
+    st.metric(label="Available Memory", value=f"{available_memory:.2f} GB")
 
 if __name__ == "__main__":
     main()
