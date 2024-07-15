@@ -18,6 +18,7 @@ import mysql.connector
 from mysql.connector import Error
 from io import BytesIO
 import psutil
+import os
 
 def load_model():
     return SentenceTransformer('xlm-r-bert-base-nli-stsb-mean-tokens')
