@@ -22,6 +22,11 @@ import psutil
 def load_model():
     return SentenceTransformer('xlm-r-bert-base-nli-stsb-mean-tokens')
 
+def get_memory_usage():
+    process = psutil.Process(os.getpid())
+    mem_info = process.memory_info()
+    return mem_info.rss / (1024 ** 3)  # Convert bytes to GB
+
 def get_text_embedding(text):
     # 모델을 사용할 때만 로드
     model = load_model()
