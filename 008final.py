@@ -877,8 +877,8 @@ def main():
     )
 
     memory_usage = get_memory_usage()
-    total_memory = psutil.virtual_memory().total / (1024 ** 3)  # Convert bytes to GB
-    available_memory = psutil.virtual_memory().available / (1024 ** 3)  # Convert bytes to GB
+    total_memory = 1.0  # Streamlit 클라우드 무료 플랜의 메모리 제한은 1GB
+    available_memory = total_memory - memory_usage
 
     st.metric(label="Memory Usage", value=f"{memory_usage:.2f} GB / {total_memory:.2f} GB")
     st.metric(label="Available Memory", value=f"{available_memory:.2f} GB")
