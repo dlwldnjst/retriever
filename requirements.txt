@@ -11,3 +11,4 @@ sentence-transformers
 psutil
 mysql-connector-python
 openpyxl
+os
