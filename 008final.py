@@ -875,34 +875,33 @@ def main():
         """,
         height=60
     )
-# 전체 시스템 메모리와 사용 중인 메모리 측정
-memory_usage = get_memory_usage()
+    
+    # CPU 사용량
+    cpu_usage = psutil.cpu_percent(interval=1)
+    st.metric(label="CPU Usage", value=f"{cpu_usage} %")
 
-# Streamlit 클라우드 환경인지 확인
-is_streamlit_cloud = os.getenv('IS_STREAMLIT_CLOUD', 'false') == 'true'
+    # 메모리 사용량
+    memory_info = psutil.virtual_memory()
+    used_memory = memory_info.used / (1024 ** 3)  # 기가바이트 단위로 변환
+    total_memory = memory_info.total / (1024 ** 3)  # 기가바이트 단위로 변환
+    available_memory = memory_info.available / (1024 ** 3)  # 기가바이트 단위로 변환
+    st.metric(label="Memory Usage", value=f"{used_memory:.2f} GB / {total_memory:.2f} GB", delta=f"{available_memory:.2f} GB available")
 
-# Streamlit 클라우드 무료 플랜의 메모리 제한
-if is_streamlit_cloud:
+    # 디스크 사용량
+    disk_usage = psutil.disk_usage('/')
+    st.metric(label="Disk Usage", value=f"{disk_usage.percent} %")
+
+    # 네트워크 사용량
+    net_io = psutil.net_io_counters()
+    st.metric(label="Network Sent", value=f"{net_io.bytes_sent / (1024 ** 2):.2f} MB")
+    st.metric(label="Network Received", value=f"{net_io.bytes_recv / (1024 ** 2):.2f} MB")
+
+    memory_usage = get_memory_usage()
     total_memory = 1.0  # Streamlit 클라우드 무료 플랜의 메모리 제한은 1GB
-else:
-    total_memory = psutil.virtual_memory().total / (1024 ** 3)  # Convert bytes to GB
+    available_memory = total_memory - memory_usage
 
-available_memory = total_memory - memory_usage
-
-# HTML과 CSS를 사용하여 메모리 사용량을 작게 표시
-st.markdown(
-    f"""
-    <style>
-    .memory-metric {{
-        font-size: 0.8em;
-    }}
-    </style>
-    <div class="memory-metric">
-        <p>Memory Usage: {memory_usage:.2f} GB / {total_memory:.2f} GB</p>
-        <p>Available Memory: {available_memory:.2f} GB</p>
-    </div>
-    """, unsafe_allow_html=True
-)
+    st.metric(label="Memory Usage", value=f"{memory_usage:.2f} GB / {total_memory:.2f} GB")
+    st.metric(label="Available Memory", value=f"{available_memory:.2f} GB")
 
 if __name__ == "__main__":
     main()
