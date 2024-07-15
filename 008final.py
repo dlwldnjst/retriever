@@ -876,12 +876,20 @@ def main():
         height=60
     )
 
-    memory_usage = get_memory_usage()
-    total_memory = 1.0  # Streamlit 클라우드 무료 플랜의 메모리 제한은 1GB
-    available_memory = total_memory - memory_usage
+# 전체 시스템 메모리와 사용 중인 메모리 측정
+memory_usage = get_memory_usage()
 
-    st.metric(label="Memory Usage", value=f"{memory_usage:.2f} GB / {total_memory:.2f} GB")
-    st.metric(label="Available Memory", value=f"{available_memory:.2f} GB")
+# Streamlit 클라우드 환경인지 확인
+is_streamlit_cloud = os.getenv('IS_STREAMLIT_CLOUD', 'false') == 'true'
+
+# Streamlit 클라우드 무료 플랜의 메모리 제한
+if is_streamlit_cloud:
+    total_memory = 1.0  # Streamlit 클라우드 무료 플랜의 메모리 제한은 1GB
+else:
+    total_memory = psutil.virtual_memory().total / (1024 ** 3)  # Convert bytes to GB
+
+available_memory = total_memory - memory_usage
+
 
 if __name__ == "__main__":
     main()
