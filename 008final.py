@@ -14,10 +14,10 @@ import numpy as np
 import faiss
 from sentence_transformers import SentenceTransformer
 import traceback 
+import psutil
 import mysql.connector
 from mysql.connector import Error
 from io import BytesIO
-import psutil
 import os
 
 def load_model():
@@ -875,7 +875,7 @@ def main():
         """,
         height=60
     )
-    
+
     # CPU 사용량
     cpu_usage = psutil.cpu_percent(interval=1)
     st.metric(label="CPU Usage", value=f"{cpu_usage} %")
@@ -905,5 +905,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
