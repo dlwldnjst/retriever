@@ -199,7 +199,7 @@ def search_books(keywords):
     query = """
     SELECT title, author, description, isbn
     FROM books
-    WHERE MATCH(title, author, description) AGAINST (%s IN NATURAL LANGUAGE MODE)
+    WHERE LIKE(title, author, description) AGAINST (%s IN NATURAL LANGUAGE MODE)
     """
 
     logger.debug(f"Executing query: {query} with combined_keywords: {combined_keywords}")
