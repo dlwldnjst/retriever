@@ -178,7 +178,7 @@ def extract_keywords(user_input):
         return []
 
 def search_books(keywords):
-    logger.info(f"Searching for keywords using FULLTEXT: {keywords}")
+    logger.info(f"Searching for keywords using LIKE: {keywords}")
 
     if not keywords:
         logger.warning("검색할 키워드가 없습니다.")
@@ -195,17 +195,18 @@ def search_books(keywords):
 
     cursor = st.session_state.db_connection.cursor(dictionary=True)
 
-    combined_keywords = ' '.join(keywords)
-    query = """
+    like_clauses = " OR ".join(["title LIKE %s", "author LIKE %s", "description LIKE %s"] * len(keywords))
+    query = f"""
     SELECT title, author, description, isbn
     FROM books
-    WHERE LIKE(title, author, description) AGAINST (%s IN NATURAL LANGUAGE MODE)
+    WHERE {like_clauses}
     """
 
-    logger.debug(f"Executing query: {query} with combined_keywords: {combined_keywords}")
+    like_values = [f"%{keyword}%" for keyword in keywords for _ in range(3)]
+    logger.debug(f"Executing query: {query} with like_values: {like_values}")
 
     try:
-        cursor.execute(query, (combined_keywords,))
+        cursor.execute(query, like_values)
         results = cursor.fetchall()
         logger.info(f"검색 결과 수: {len(results)}")
 
@@ -220,7 +221,6 @@ def search_books(keywords):
         logger.error(f"MariaDB 검색 중 오류: {e}")
         st.session_state.error_message = f"데이터베이스 검색 중 오류 발생: {str(e)}"
         return pd.DataFrame()
-
 
 def check_db_connection(conn):
     if conn:
