@@ -178,7 +178,7 @@ def extract_keywords(user_input):
         return []
 
 def search_books(keywords):
-    logger.info(f"Searching for keywords using LIKE: {keywords}")
+    logger.info(f"Searching for keywords using LIKE with AND operator: {keywords}")
 
     if not keywords:
         logger.warning("검색할 키워드가 없습니다.")
@@ -195,7 +195,7 @@ def search_books(keywords):
 
     cursor = st.session_state.db_connection.cursor(dictionary=True)
 
-    like_clauses = " OR ".join(["title LIKE %s", "author LIKE %s", "description LIKE %s"] * len(keywords))
+    like_clauses = " AND ".join([f"(title LIKE %s OR author LIKE %s OR description LIKE %s)" for _ in keywords])
     query = f"""
     SELECT title, author, description, isbn
     FROM books
