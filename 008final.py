@@ -695,7 +695,7 @@ def search_with_vector(filtered_books, query, top_k=10):
         return pd.DataFrame()
 
 def call_gemini_api(prompt, retries=3, wait_time=10):
-    model = genai.GenerativeModel('gemini-1.5-pro-latest')
+    model = genai.GenerativeModel('gemini-1.5-flash')
     for attempt in range(retries):
         try:
             response = model.generate_content(contents=prompt)
